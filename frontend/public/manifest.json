@@ -1,0 +1,49 @@
+{
+  "name": "Alimquical",
+  "short_name": "Alimquical",
+  "description": "Plataforma SaaS con múltiples agentes de inteligencia artificial para la gestión empresarial",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "portrait-primary",
+  "theme_color": "#1565C0",
+  "background_color": "#1565C0",
+  "scope": "/",
+  "id": "/",
+  "categories": ["business", "productivity", "artificial-intelligence"],
+  "lang": "es-MX",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "related_applications": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Ver panel de control",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Reuniones",
+      "short_name": "Reuniones",
+      "description": "Gestionar reuniones",
+      "url": "/reuniones",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

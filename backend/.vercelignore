@@ -1,0 +1,16 @@
+.venv
+.venv/**
+__pycache__
+__pycache__/**
+*.db
+*.db-journal
+.env
+alembic/
+scripts/
+auth/
+utils/
+db/
+services/
+.vscode/
+.git/
+README.md

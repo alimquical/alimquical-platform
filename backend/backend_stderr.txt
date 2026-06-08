@@ -1,0 +1,6 @@
+INFO:     Will watch for changes in these directories: ['C:\\Users\\PC\\Documents\\EXTERNOS IA\\ALIMQUICAL_AI_EXECUTIVE_PLATFORM\\backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [11428] using WatchFiles
+INFO:     Started server process [13196]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
