@@ -1,7 +1,9 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from core.config import settings
+from core.database import engine, Base
 from api.v1.auth import router as auth_router
 from api.v1.meetings import router as meetings_router
 from api.v1.admin import router as admin_router
@@ -13,7 +15,14 @@ if settings.SENTRY_DSN:
     except ImportError:
         pass
 
-app = FastAPI(
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(lifespan=lifespan,
     title=settings.APP_NAME,
     version=settings.VERSION,
     docs_url="/docs" if settings.DEBUG else None,
