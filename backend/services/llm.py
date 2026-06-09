@@ -4,53 +4,70 @@ from core.config import settings
 
 class LLMService:
     def __init__(self):
-        self._client = None
+        self._openai = None
+        self._anthropic = None
+        self._google = None
 
-    def _get_client(self):
-        if self._client is None and settings.OPENAI_API_KEY:
-            from openai import OpenAI
-            self._client = OpenAI(api_key=settings.OPENAI_API_KEY)
-        return self._client
+    @property
+    def provider(self) -> Optional[str]:
+        if settings.OPENAI_API_KEY:
+            return "openai"
+        if settings.ANTHROPIC_API_KEY:
+            return "anthropic"
+        if settings.GOOGLE_API_KEY:
+            return "google"
+        return None
 
     def is_available(self) -> bool:
-        return bool(settings.OPENAI_API_KEY)
+        return self.provider is not None
 
-    def chat(self, system_prompt: str, user_message: str, model: str = "gpt-4o-mini", temperature: float = 0.3) -> Optional[str]:
-        client = self._get_client()
-        if not client:
-            return None
+    def chat(self, system_prompt: str, user_message: str, model: str = None, temperature: float = 0.3) -> Optional[str]:
+        provider = self.provider
+        if provider == "openai":
+            return self._chat_openai(system_prompt, user_message, model or "gpt-4o-mini", temperature)
+        elif provider == "anthropic":
+            return self._chat_anthropic(system_prompt, user_message, model or "claude-3-haiku-20240307", temperature)
+        elif provider == "google":
+            return self._chat_google(system_prompt, user_message, model or "gemini-1.5-flash", temperature)
+        return None
+
+    def _chat_openai(self, system_prompt: str, user_message: str, model: str, temperature: float) -> Optional[str]:
         try:
+            from openai import OpenAI
+            client = OpenAI(api_key=settings.OPENAI_API_KEY)
             resp = client.chat.completions.create(
                 model=model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message},
-                ],
+                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_message}],
                 temperature=temperature,
             )
             return resp.choices[0].message.content
         except Exception:
             return None
 
-    def chat_with_tools(self, system_prompt: str, user_message: str, tools: list[dict], model: str = "gpt-4o-mini"):
-        client = self._get_client()
-        if not client:
-            return None, None
+    def _chat_anthropic(self, system_prompt: str, user_message: str, model: str, temperature: float) -> Optional[str]:
         try:
-            resp = client.chat.completions.create(
+            import anthropic
+            client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+            resp = client.messages.create(
                 model=model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message},
-                ],
-                tools=tools,
-                tool_choice="auto",
-                temperature=0.3,
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_message}],
+                temperature=temperature,
+                max_tokens=2048,
             )
-            msg = resp.choices[0].message
-            return msg.content, msg.tool_calls
+            return resp.content[0].text if resp.content else None
         except Exception:
-            return None, None
+            return None
+
+    def _chat_google(self, system_prompt: str, user_message: str, model: str, temperature: float) -> Optional[str]:
+        try:
+            import google.generativeai as genai
+            genai.configure(api_key=settings.GOOGLE_API_KEY)
+            model_instance = genai.GenerativeModel(model, system_instruction=system_prompt)
+            resp = model_instance.generate_content(user_message, generation_config={"temperature": temperature})
+            return resp.text
+        except Exception:
+            return None
 
 
 llm = LLMService()
