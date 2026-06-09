@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from core.database import get_db
@@ -9,6 +10,7 @@ from pydantic import BaseModel
 from typing import Optional
 from fastapi import Header
 from core.security import get_password_hash
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -50,16 +52,20 @@ class PlanUpdate(BaseModel):
 
 @router.post("/users", status_code=201)
 def create_user(data: UserCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == data.email).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="El correo ya está registrado")
-    company = Company(name=data.company_name, plan=data.plan, meetings_limit=data.meetings_limit, users_limit=data.users_limit)
-    db.add(company); db.flush()
-    sub = Subscription(company_id=company.id, plan=data.plan, status="active")
-    db.add(sub)
-    user = User(email=data.email, name=data.name, hashed_password=get_password_hash(data.password), role=UserRole(data.role), company_id=company.id)
-    db.add(user); db.commit(); db.refresh(user)
-    return {"id": user.id, "email": user.email, "name": user.name, "role": user.role.value, "company_id": user.company_id}
+    try:
+        existing = db.query(User).filter(User.email == data.email).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="El correo ya está registrado")
+        company = Company(name=data.company_name, plan=data.plan, meetings_limit=data.meetings_limit, users_limit=data.users_limit)
+        db.add(company); db.flush()
+        sub = Subscription(company_id=company.id, plan=data.plan, status="active")
+        db.add(sub)
+        user = User(email=data.email, name=data.name, hashed_password=get_password_hash(data.password), role=UserRole(data.role), company_id=company.id)
+        db.add(user); db.commit(); db.refresh(user)
+        return {"id": user.id, "email": user.email, "name": user.name, "role": user.role.value, "company_id": user.company_id}
+    except Exception as e:
+        logger.error("Error creando usuario", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
 
 @router.get("/users")
