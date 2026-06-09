@@ -2,14 +2,14 @@ import type { Metadata, Viewport } from "next";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "Alimquical - AI Executive Platform",
+  title: "INTELLIWORK™ - Intelligent Executive Workspace",
   description:
-    "Plataforma SaaS con múltiples agentes de inteligencia artificial para la gestión empresarial",
+    "Plataforma empresarial con agentes de inteligencia artificial para reuniones, documentación y productividad ejecutiva",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Alimquical",
+    title: "INTELLIWORK",
   },
   icons: {
     icon: [
@@ -36,10 +36,10 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="application-name" content="Alimquical" />
+        <meta name="application-name" content="INTELLIWORK" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Alimquical" />
+        <meta name="apple-mobile-web-app-title" content="INTELLIWORK" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#1565C0" />
       </head>

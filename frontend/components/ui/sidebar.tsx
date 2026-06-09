@@ -53,7 +53,7 @@ export function Sidebar({ children }: SidebarProps) {
           {!collapsed && (
             <Link href="/dashboard" className="flex items-center gap-2">
               <Bot className="h-6 w-6 text-blue-600" />
-              <span className="font-bold text-blue-600">Alimquical</span>
+              <span className="font-bold text-blue-600">INTELLIWORK™</span>
             </Link>
           )}
           {collapsed && (

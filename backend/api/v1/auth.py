@@ -58,7 +58,7 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         email=request.email,
         name=request.name,
         hashed_password=get_password_hash(request.password),
-        role=UserRole.ADMIN,
+        role=UserRole.USER,
         company_id=company.id,
     )
     db.add(user)

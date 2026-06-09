@@ -1,5 +1,5 @@
 const CACHE_VERSION = 'v2.0.0';
-const CACHE_NAME = `alimquical-${CACHE_VERSION}`;
+const CACHE_NAME = `intelliwork-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
   '/',
@@ -22,7 +22,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => name.startsWith('alimquical-') && name !== CACHE_NAME)
+          .filter((name) => name.startsWith('intelliwork-') && name !== CACHE_NAME)
           .map((name) => caches.delete(name))
       );
     }).then(() => self.clients.claim())

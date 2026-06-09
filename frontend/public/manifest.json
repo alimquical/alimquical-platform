@@ -1,7 +1,7 @@
 {
-  "name": "Alimquical",
-  "short_name": "Alimquical",
-  "description": "Plataforma SaaS con múltiples agentes de inteligencia artificial para la gestión empresarial",
+  "name": "INTELLIWORK™",
+  "short_name": "INTELLIWORK",
+  "description": "Plataforma empresarial con agentes de inteligencia artificial para reuniones, documentación y productividad ejecutiva",
   "start_url": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],
