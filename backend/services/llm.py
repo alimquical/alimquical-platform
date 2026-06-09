@@ -16,6 +16,8 @@ class LLMService:
             return "anthropic"
         if settings.GOOGLE_API_KEY:
             return "google"
+        if settings.GROQ_API_KEY:
+            return "groq"
         return None
 
     def is_available(self) -> bool:
@@ -29,7 +31,22 @@ class LLMService:
             return self._chat_anthropic(system_prompt, user_message, model or "claude-3-haiku-20240307", temperature)
         elif provider == "google":
             return self._chat_google(system_prompt, user_message, model or "gemini-1.5-flash", temperature)
+        elif provider == "groq":
+            return self._chat_groq(system_prompt, user_message, model or "llama-3.3-70b-versatile", temperature)
         return None
+
+    def _chat_groq(self, system_prompt: str, user_message: str, model: str, temperature: float) -> Optional[str]:
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=settings.GROQ_API_KEY, base_url="https://api.groq.com/openai/v1")
+            resp = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_message}],
+                temperature=temperature,
+            )
+            return resp.choices[0].message.content
+        except Exception:
+            return None
 
     def _chat_openai(self, system_prompt: str, user_message: str, model: str, temperature: float) -> Optional[str]:
         try:
