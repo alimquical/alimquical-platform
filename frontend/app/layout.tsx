@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "@/styles/globals.css";
+import { ThemeProvider } from "next-themes";
+import { I18nProvider } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: "INTELLIWORK™ - Intelligent Executive Workspace",
@@ -44,7 +46,11 @@ export default function RootLayout({
         <meta name="theme-color" content="#1565C0" />
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <I18nProvider>
+            {children}
+          </I18nProvider>
+        </ThemeProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `

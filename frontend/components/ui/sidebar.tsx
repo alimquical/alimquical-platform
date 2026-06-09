@@ -14,24 +14,13 @@ import {
   Settings,
   Shield,
   ChevronLeft,
-  Menu,
   Bot,
   LogOut,
 } from "lucide-react";
 import { useState } from "react";
-
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Reuniones", href: "/reuniones", icon: Calendar },
-  { name: "Clientes", href: "/clientes", icon: Users },
-  { name: "Proveedores", href: "/proveedores", icon: Building2 },
-  { name: "Documentos", href: "/documentos", icon: FileText },
-  { name: "Tareas", href: "/tareas", icon: CheckSquare },
-  { name: "Agenda", href: "/agenda", icon: Calendar },
-  { name: "Notificaciones", href: "/notificaciones", icon: Bell },
-  { name: "Configuración", href: "/configuracion", icon: Settings },
-  { name: "Admin", href: "/admin", icon: Shield },
-];
+import { useTranslation } from "@/lib/i18n";
+import { ThemeToggle } from "./theme-toggle";
+import { LanguageToggle } from "./language-toggle";
 
 interface SidebarProps {
   children: React.ReactNode;
@@ -40,6 +29,20 @@ interface SidebarProps {
 export function Sidebar({ children }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { t } = useTranslation();
+
+  const navigation = [
+    { name: t("nav.dashboard"), href: "/dashboard", icon: LayoutDashboard },
+    { name: t("nav.reuniones"), href: "/reuniones", icon: Calendar },
+    { name: t("nav.clientes"), href: "/clientes", icon: Users },
+    { name: t("nav.proveedores"), href: "/proveedores", icon: Building2 },
+    { name: t("nav.documentos"), href: "/documentos", icon: FileText },
+    { name: t("nav.tareas"), href: "/tareas", icon: CheckSquare },
+    { name: t("nav.agenda"), href: "/agenda", icon: Calendar },
+    { name: t("nav.notificaciones"), href: "/notificaciones", icon: Bell },
+    { name: t("nav.configuracion"), href: "/configuracion", icon: Settings },
+    { name: t("nav.admin"), href: "/admin", icon: Shield },
+  ];
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -74,7 +77,7 @@ export function Sidebar({ children }: SidebarProps) {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
-                key={item.name}
+                key={item.href}
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
@@ -92,7 +95,12 @@ export function Sidebar({ children }: SidebarProps) {
           })}
         </nav>
 
-        <div className="border-t p-2">
+        <div className="border-t p-2 space-y-1">
+          <LanguageToggle collapsed={collapsed} />
+          <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between px-3")}>
+            {!collapsed && <span className="text-xs text-sidebar-foreground/60">{t("nav.dashboard") === "Dashboard" ? "Theme" : "Tema"}</span>}
+            <ThemeToggle collapsed={collapsed} />
+          </div>
           <button
             className={cn(
               "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent",
@@ -100,7 +108,7 @@ export function Sidebar({ children }: SidebarProps) {
             )}
           >
             <LogOut className="h-4 w-4 shrink-0" />
-            {!collapsed && <span>Cerrar sesión</span>}
+            {!collapsed && <span>{t("nav.logout")}</span>}
           </button>
         </div>
       </aside>
