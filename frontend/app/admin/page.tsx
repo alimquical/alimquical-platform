@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sidebar } from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
-import { Users, Shield, Activity, BarChart3, Trash2, CheckCircle, XCircle, RefreshCw, Plus, X } from "lucide-react";
+import { Users, Shield, Activity, BarChart3, Trash2, CheckCircle, XCircle, RefreshCw, Plus, X, ExternalLink, CreditCard } from "lucide-react";
 
 interface UserData {
   id: string;
@@ -26,6 +26,28 @@ export default function AdminPage() {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", company_name: "", plan: "starter", role: "user" });
   const [creating, setCreating] = useState(false);
+  const [generatingLink, setGeneratingLink] = useState<string | null>(null);
+
+  const generatePaymentLink = async (userId: string) => {
+    setGeneratingLink(userId);
+    try {
+      const res = await fetch("/api/payments/create-link", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, return_url: "https://frontend-dusky-chi-71.vercel.app/dashboard" }),
+      });
+      const data = await res.json();
+      if (res.ok && data.payment_url) {
+        window.open(data.payment_url, "_blank");
+      } else {
+        alert(data.detail || "Error al generar link");
+      }
+    } catch {
+      alert("Error de conexión");
+    } finally {
+      setGeneratingLink(null);
+    }
+  };
 
   useEffect(() => {
     const t = localStorage.getItem("access_token") || "";
@@ -168,6 +190,14 @@ export default function AdminPage() {
                               title={u.is_active ? "Desactivar" : "Activar"}
                             >
                               {u.is_active ? <XCircle className="h-4 w-4 text-red-500" /> : <CheckCircle className="h-4 w-4 text-green-500" />}
+                            </button>
+                            <button
+                              onClick={() => generatePaymentLink(u.id)}
+                              disabled={generatingLink === u.id}
+                              className="rounded p-1 hover:bg-gray-100"
+                              title="Generar link de pago"
+                            >
+                              <CreditCard className={`h-4 w-4 text-blue-500 ${generatingLink === u.id ? "animate-pulse" : ""}`} />
                             </button>
                             <button
                               onClick={() => deleteUser(u.id)}

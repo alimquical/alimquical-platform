@@ -19,6 +19,9 @@ class Subscription(Base):
     cancel_at_period_end = Column(Boolean, default=False)
     stripe_subscription_id = Column(String, nullable=True)
     stripe_customer_id = Column(String, nullable=True)
+    mercadopago_preference_id = Column(String, nullable=True)
+    mercadopago_payment_id = Column(String, nullable=True)
+    payment_gateway = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

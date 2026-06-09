@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     WHATSAPP_API_TOKEN: Optional[str] = None
     WHATSAPP_PHONE_NUMBER_ID: Optional[str] = None
 
+    MERCADO_PAGO_ACCESS_TOKEN: Optional[str] = None
+    MERCADO_PAGO_WEBHOOK_SECRET: Optional[str] = None
+
     model_config = {"env_file": ".env", "case_sensitive": True, "extra": "ignore"}
 
     @classmethod
