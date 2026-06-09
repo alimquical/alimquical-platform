@@ -37,18 +37,19 @@ class LLMService:
 
     def _chat_groq(self, system_prompt: str, user_message: str, model: str, temperature: float) -> Optional[str]:
         try:
-            import httpx
-            resp = httpx.post(
+            import json, urllib.request
+            data = json.dumps({"model": model, "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_message}], "temperature": temperature}).encode()
+            req = urllib.request.Request(
                 "https://api.groq.com/openai/v1/chat/completions",
+                data=data,
                 headers={"Authorization": f"Bearer {settings.GROQ_API_KEY}", "Content-Type": "application/json"},
-                json={"model": model, "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_message}], "temperature": temperature},
-                timeout=60,
             )
-            resp.raise_for_status()
-            return resp.json()["choices"][0]["message"]["content"]
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                result = json.loads(resp.read())
+                return result["choices"][0]["message"]["content"]
         except Exception as e:
-            import logging
-            logging.error(f"Groq LLM error: {e}")
+            import sys
+            sys.stderr.write(f"GROQ_ERROR: {e}\n")
             return None
 
     def _chat_openai(self, system_prompt: str, user_message: str, model: str, temperature: float) -> Optional[str]:
