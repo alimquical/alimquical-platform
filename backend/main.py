@@ -12,6 +12,7 @@ from api.v1.auth import router as auth_router
 from api.v1.meetings import router as meetings_router
 from api.v1.admin import router as admin_router
 from api.v1.payments import router as payments_router
+from api.v1.agents import router as agents_router
 
 if settings.SENTRY_DSN:
     try:
@@ -37,6 +38,8 @@ def seed_admin():
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     seed_admin()
+    from agents import init_agents
+    init_agents()
     yield
 
 
@@ -64,6 +67,7 @@ app.include_router(auth_router, prefix="/api/v1")
 app.include_router(meetings_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(payments_router, prefix="/api/v1")
+app.include_router(agents_router, prefix="/api/v1")
 
 
 @app.get("/health")
