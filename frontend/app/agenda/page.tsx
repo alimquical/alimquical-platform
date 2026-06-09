@@ -4,36 +4,38 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sidebar } from "@/components/ui/sidebar";
+import { useTranslation } from "@/lib/i18n";
 import { Calendar, Clock, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 
 const events = [
-  { id: 1, title: "Revisión trimestral Q2", time: "10:00 - 11:30", type: "reunión", date: "Hoy" },
-  { id: 2, title: "Sprint planning - Equipo Dev", time: "14:00 - 15:00", type: "reunión", date: "Hoy" },
-  { id: 3, title: "Presentación cliente nuevo", time: "09:00 - 09:45", type: "reunión", date: "Mañana" },
+  { id: 1, title: "Revisión trimestral Q2", time: "10:00 - 11:30", type: "meeting", date: "today" },
+  { id: 2, title: "Sprint planning - Equipo Dev", time: "14:00 - 15:00", type: "meeting", date: "today" },
+  { id: 3, title: "Presentación cliente nuevo", time: "09:00 - 09:45", type: "meeting", date: "tomorrow" },
   { id: 4, title: "Corte de nómina", time: "Todo el día", type: "deadline", date: "18 jun" },
-  { id: 5, title: "Comité de calidad", time: "11:00 - 13:00", type: "reunión", date: "19 jun" },
+  { id: 5, title: "Comité de calidad", time: "11:00 - 13:00", type: "meeting", date: "19 jun" },
   { id: 6, title: "Entrega reporte mensual", time: "17:00", type: "deadline", date: "20 jun" },
 ];
 
 export default function AgendaPage() {
+  const { t } = useTranslation();
+  const days = [t("agenda.mon"), t("agenda.tue"), t("agenda.wed"), t("agenda.thu"), t("agenda.fri"), t("agenda.sat"), t("agenda.sun")];
   return (
     <Sidebar>
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Agenda</h1>
-            <p className="text-sm text-muted-foreground">Calendario y programación de eventos</p>
+            <h1 className="text-2xl font-bold">{t("agenda.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("agenda.subtitle")}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="icon"><ChevronLeft className="h-4 w-4" /></Button>
-            <span className="text-sm font-medium">Junio 2026</span>
+            <span className="text-sm font-medium">{t("agenda.june")} 2026</span>
             <Button variant="outline" size="icon"><ChevronRight className="h-4 w-4" /></Button>
-            <Button size="sm"><Plus className="mr-2 h-4 w-4" />Nuevo evento</Button>
+            <Button size="sm"><Plus className="mr-2 h-4 w-4" />{t("agenda.new_event")}</Button>
           </div>
         </div>
-
         <div className="grid gap-6 lg:grid-cols-7">
-          {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => (
+          {days.map((day) => (
             <div key={day} className="text-center text-xs font-medium text-muted-foreground p-2">{day}</div>
           ))}
           {Array.from({ length: 30 }, (_, i) => i + 1).map((d) => (
@@ -44,14 +46,13 @@ export default function AgendaPage() {
             </div>
           ))}
         </div>
-
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Eventos del día</CardTitle>
+            <CardTitle className="text-lg">{t("agenda.day_events")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {events.filter(e => e.date === "Hoy").map((event) => (
+              {events.filter(e => e.date === "today").map((event) => (
                 <div key={event.id} className="flex items-center gap-4 rounded-lg border p-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
                     <Calendar className="h-5 w-5 text-blue-600" />
@@ -60,7 +61,7 @@ export default function AgendaPage() {
                     <p className="text-sm font-medium">{event.title}</p>
                     <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" />{event.time}</p>
                   </div>
-                  <Badge variant="secondary">{event.type}</Badge>
+                  <Badge variant="secondary">{event.type === "meeting" ? t("agenda.meeting") : t("agenda.deadline")}</Badge>
                 </div>
               ))}
             </div>

@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sidebar } from "@/components/ui/sidebar";
+import { useTranslation } from "@/lib/i18n";
 import { FileText, FileSpreadsheet, FileImage, File, Plus, Search, Download, Trash2 } from "lucide-react";
 
 const documents = [
@@ -25,26 +26,26 @@ const getIcon = (type: string) => {
 };
 
 export default function DocumentosPage() {
+  const { t } = useTranslation();
   return (
     <Sidebar>
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Documentos</h1>
-            <p className="text-sm text-muted-foreground">Biblioteca de documentos e informes</p>
+            <h1 className="text-2xl font-bold">{t("documents.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("documents.subtitle")}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
               <Search className="mr-2 h-4 w-4" />
-              Buscar
+              {t("documents.search")}
             </Button>
             <Button size="sm">
               <Plus className="mr-2 h-4 w-4" />
-              Subir documento
+              {t("documents.upload")}
             </Button>
           </div>
         </div>
-
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {documents.map((doc) => {
             const Icon = getIcon(doc.type);

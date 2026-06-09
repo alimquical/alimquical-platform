@@ -4,37 +4,38 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sidebar } from "@/components/ui/sidebar";
+import { useTranslation } from "@/lib/i18n";
 import { Users, Phone, Mail, Plus, Search } from "lucide-react";
 
 const clients = [
-  { id: 1, name: "TechSolutions SA", contact: "Carlos López", email: "carlos@techsolutions.com", phone: "+52 55 1234 5678", status: "activo", lastContact: "2026-06-14", deals: 12 },
-  { id: 2, name: "Innovación Digital", contact: "María García", email: "maria@innovacion.digital", phone: "+52 55 8765 4321", status: "activo", lastContact: "2026-06-13", deals: 8 },
+  { id: 1, name: "TechSolutions SA", contact: "Carlos López", email: "carlos@techsolutions.com", phone: "+52 55 1234 5678", status: "active", lastContact: "2026-06-14", deals: 12 },
+  { id: 2, name: "Innovación Digital", contact: "María García", email: "maria@innovacion.digital", phone: "+52 55 8765 4321", status: "active", lastContact: "2026-06-13", deals: 8 },
   { id: 3, name: "Grupo Empresarial MX", contact: "Juan Pérez", email: "juan@grupoempresarial.mx", phone: "+52 55 2468 1357", status: "lead", lastContact: "2026-06-10", deals: 0 },
-  { id: 4, name: "Consultoría Estratégica", contact: "Ana Martínez", email: "ana@consultoria.com", phone: "+52 55 1357 2468", status: "inactivo", lastContact: "2026-05-20", deals: 3 },
-  { id: 5, name: "DataCloud Systems", contact: "Roberto Sánchez", email: "roberto@datacloud.io", phone: "+52 55 9876 5432", status: "activo", lastContact: "2026-06-14", deals: 25 },
+  { id: 4, name: "Consultoría Estratégica", contact: "Ana Martínez", email: "ana@consultoria.com", phone: "+52 55 1357 2468", status: "inactive", lastContact: "2026-05-20", deals: 3 },
+  { id: 5, name: "DataCloud Systems", contact: "Roberto Sánchez", email: "roberto@datacloud.io", phone: "+52 55 9876 5432", status: "active", lastContact: "2026-06-14", deals: 25 },
 ];
 
 export default function ClientesPage() {
+  const { t } = useTranslation();
   return (
     <Sidebar>
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Clientes</h1>
-            <p className="text-sm text-muted-foreground">Gestión de relaciones con clientes (CRM)</p>
+            <h1 className="text-2xl font-bold">{t("clients.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("clients.subtitle")}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
               <Search className="mr-2 h-4 w-4" />
-              Buscar
+              {t("clients.search")}
             </Button>
             <Button size="sm">
               <Plus className="mr-2 h-4 w-4" />
-              Nuevo cliente
+              {t("clients.new")}
             </Button>
           </div>
         </div>
-
         <Card>
           <CardContent className="p-0">
             <div className="divide-y">
@@ -54,9 +55,9 @@ export default function ClientesPage() {
                     <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{client.phone}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground">{client.deals} negocios</span>
-                    <Badge variant={client.status === "activo" ? "success" : client.status === "lead" ? "warning" : "secondary"}>
-                      {client.status}
+                    <span className="text-xs text-muted-foreground">{client.deals} {t("clients.businesses")}</span>
+                    <Badge variant={client.status === "active" ? "success" : client.status === "lead" ? "warning" : "secondary"}>
+                      {client.status === "active" ? t("clients.active") : client.status === "lead" ? t("clients.lead") : t("clients.inactive")}
                     </Badge>
                   </div>
                 </div>
