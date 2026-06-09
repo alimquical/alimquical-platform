@@ -8,6 +8,7 @@ from models.company import Company
 from models.subscription import Subscription
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime, timezone, timedelta
 from fastapi import Header
 from core.security import get_password_hash
 logger = logging.getLogger(__name__)
@@ -58,7 +59,8 @@ def create_user(data: UserCreate, admin: User = Depends(get_current_admin), db: 
             raise HTTPException(status_code=400, detail="El correo ya está registrado")
         company = Company(name=data.company_name, plan=data.plan, meetings_limit=data.meetings_limit, users_limit=data.users_limit)
         db.add(company); db.flush()
-        sub = Subscription(company_id=company.id, plan=data.plan, status="active")
+        now = datetime.now(timezone.utc)
+        sub = Subscription(company_id=company.id, plan=data.plan, status="active", current_period_start=now, current_period_end=now + timedelta(days=30))
         db.add(sub)
         user = User(email=data.email, name=data.name, hashed_password=get_password_hash(data.password), role=UserRole(data.role), company_id=company.id)
         db.add(user); db.commit(); db.refresh(user)
