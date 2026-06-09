@@ -2,8 +2,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from sqlalchemy.orm import Session
 from core.config import settings
-from core.database import engine, Base
+from core.database import engine, Base, SessionLocal
+from core.security import get_password_hash
+from models.user import User, UserRole
+from models.company import Company
 from api.v1.auth import router as auth_router
 from api.v1.meetings import router as meetings_router
 from api.v1.admin import router as admin_router
@@ -16,9 +20,22 @@ if settings.SENTRY_DSN:
         pass
 
 
+def seed_admin():
+    db: Session = SessionLocal()
+    try:
+        existing = db.query(User).filter(User.email == "admin@alimquical.com").first()
+        if not existing:
+            company = Company(name="Alimquical Inc", plan="enterprise", meetings_limit=9999, users_limit=100)
+            db.add(company); db.flush()
+            user = User(email="admin@alimquical.com", name="Admin", hashed_password=get_password_hash("Admin123!"), role=UserRole.ADMIN, company_id=company.id)
+            db.add(user); db.commit()
+    finally:
+        db.close()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    seed_admin()
     yield
 
 
