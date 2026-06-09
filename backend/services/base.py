@@ -40,5 +40,5 @@ class PaymentGateway:
     ) -> PaymentLinkResult:
         raise NotImplementedError
 
-    def process_webhook(self, body: dict, headers: dict) -> PaymentWebhookResult:
+    def process_webhook(self, body: dict, raw_body: bytes, headers: dict) -> PaymentWebhookResult:
         raise NotImplementedError

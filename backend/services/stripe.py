@@ -63,18 +63,28 @@ class StripeGateway(PaymentGateway):
         except Exception as e:
             return PaymentLinkResult(success=False, error=f"Error Stripe: {str(e)}")
 
-    def process_webhook(self, body: dict, headers: dict) -> PaymentWebhookResult:
-        event_type = body.get("type")
-        if event_type == "checkout.session.completed":
-            session = body.get("data", {}).get("object", {})
-            metadata = session.get("metadata", {})
-            if session.get("payment_status") == "paid":
-                return PaymentWebhookResult(
-                    success=True,
-                    user_id=metadata.get("user_id"),
-                    company_id=metadata.get("company_id"),
-                    plan=metadata.get("plan"),
-                    gateway=self.name,
-                    payment_id=session.get("id"),
+    def process_webhook(self, body: dict, raw_body: bytes, headers: dict) -> PaymentWebhookResult:
+        sig_header = headers.get("stripe-signature")
+        if sig_header and settings.STRIPE_WEBHOOK_SECRET:
+            try:
+                import stripe
+                event = stripe.Webhook.construct_event(
+                    payload=raw_body,
+                    sig_header=sig_header,
+                    secret=settings.STRIPE_WEBHOOK_SECRET,
                 )
+                if event["type"] == "checkout.session.completed":
+                    session = event["data"]["object"]
+                    metadata = session.get("metadata", {})
+                    if session.get("payment_status") == "paid":
+                        return PaymentWebhookResult(
+                            success=True,
+                            user_id=metadata.get("user_id"),
+                            company_id=metadata.get("company_id"),
+                            plan=metadata.get("plan"),
+                            gateway=self.name,
+                            payment_id=session.get("id"),
+                        )
+            except Exception:
+                pass
         return PaymentWebhookResult(success=False)

@@ -65,7 +65,7 @@ class MercadoPagoGateway(PaymentGateway):
             )
         return PaymentLinkResult(success=False, error=f"Error MP: {result}")
 
-    def process_webhook(self, body: dict, headers: dict) -> PaymentWebhookResult:
+    def process_webhook(self, body: dict, raw_body: bytes, headers: dict) -> PaymentWebhookResult:
         if body.get("type") == "payment":
             payment_id = body.get("data", {}).get("id")
             if not payment_id:

@@ -59,11 +59,12 @@ def create_payment_link(
 
 @router.post("/webhook")
 async def payments_webhook(request: Request, db: Session = Depends(get_db)):
+    raw_body = await request.body()
     body = await request.json()
     headers = dict(request.headers)
 
     for gateway in get_available_gateways():
-        result = gateway.process_webhook(body, headers)
+        result = gateway.process_webhook(body, raw_body, headers)
         if result.success and result.company_id:
             sub = db.query(Subscription).filter(Subscription.company_id == result.company_id).first()
             if sub:
