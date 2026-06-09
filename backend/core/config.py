@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     MERCADO_PAGO_ACCESS_TOKEN: Optional[str] = None
     MERCADO_PAGO_WEBHOOK_SECRET: Optional[str] = None
 
+    STRIPE_SECRET_KEY: Optional[str] = None
+    STRIPE_WEBHOOK_SECRET: Optional[str] = None
+
     model_config = {"env_file": ".env", "case_sensitive": True, "extra": "ignore"}
 
     @classmethod

@@ -62,24 +62,25 @@ async def payments_webhook(request: Request, db: Session = Depends(get_db)):
     body = await request.json()
     headers = dict(request.headers)
 
-    gateway = get_default_gateway()
-    if not gateway:
-        raise HTTPException(status_code=503, detail="No hay pasarela configurada")
-
-    result = gateway.process_webhook(body, headers)
-    if result.success and result.company_id:
-        sub = db.query(Subscription).filter(Subscription.company_id == result.company_id).first()
-        if sub:
-            now = datetime.now(timezone.utc)
-            sub.status = "active"
-            sub.current_period_start = now
-            sub.current_period_end = now + timedelta(days=30)
-            if result.gateway:
-                sub.stripe_subscription_id = result.payment_id
-        company = db.query(Company).filter(Company.id == result.company_id).first()
-        if company:
-            company.plan = result.plan or company.plan
-        db.commit()
+    for gateway in get_available_gateways():
+        result = gateway.process_webhook(body, headers)
+        if result.success and result.company_id:
+            sub = db.query(Subscription).filter(Subscription.company_id == result.company_id).first()
+            if sub:
+                now = datetime.now(timezone.utc)
+                sub.status = "active"
+                sub.current_period_start = now
+                sub.current_period_end = now + timedelta(days=30)
+                sub.payment_gateway = result.gateway
+                if result.gateway == "stripe":
+                    sub.stripe_subscription_id = result.payment_id
+                if result.gateway == "mercadopago":
+                    sub.mercadopago_payment_id = result.payment_id
+            company = db.query(Company).filter(Company.id == result.company_id).first()
+            if company:
+                company.plan = result.plan or company.plan
+            db.commit()
+            break
     return {"status": "ok"}
 
 

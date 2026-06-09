@@ -27,14 +27,22 @@ export default function AdminPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "", company_name: "", plan: "starter", role: "user" });
   const [creating, setCreating] = useState(false);
   const [generatingLink, setGeneratingLink] = useState<string | null>(null);
+  const [availableGateways, setAvailableGateways] = useState<string[]>(["stripe"]);
+
+  useEffect(() => {
+    fetch("/api/payments/gateways").then(r => r.json()).then(d => {
+      if (Array.isArray(d)) setAvailableGateways(d.filter((g: any) => g.available).map((g: any) => g.name));
+    }).catch(() => {});
+  }, []);
 
   const generatePaymentLink = async (userId: string) => {
     setGeneratingLink(userId);
     try {
+      const gateway = availableGateways.includes("stripe") ? "stripe" : availableGateways[0] || undefined;
       const res = await fetch("/api/payments/create-link", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, return_url: "https://frontend-dusky-chi-71.vercel.app/dashboard" }),
+        body: JSON.stringify({ user_id: userId, return_url: "https://frontend-dusky-chi-71.vercel.app/dashboard", gateway }),
       });
       const data = await res.json();
       if (res.ok && data.payment_url) {
