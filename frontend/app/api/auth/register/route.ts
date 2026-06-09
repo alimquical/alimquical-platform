@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
+import apiUrl from "@/lib/api-url";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { name, email, password, company_name } = body;
-
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
     const res = await fetch(`${apiUrl}/api/v1/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Bypass-Tunnel-Reminder": "true" },

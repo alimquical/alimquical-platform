@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "not set";
+import apiUrl from "@/lib/api-url";
 
 export async function POST(req: Request) {
   const results: Record<string, unknown> = {
-    api_url: API_URL,
+    api_url: apiUrl,
     tests: [] as Record<string, unknown>[],
   };
 
@@ -19,7 +18,7 @@ export async function POST(req: Request) {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
-    const res = await fetch(`${API_URL}/api/v1/auth/login`, {
+    const res = await fetch(`${apiUrl}/api/v1/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body || { email: "admin@alimquical.com", password: "Admin123!" }),
@@ -28,13 +27,13 @@ export async function POST(req: Request) {
     clearTimeout(timeout);
     const text = await res.text();
     (results.tests as Record<string, unknown>[]).push({
-      url: `${API_URL}/api/v1/auth/login`,
+      url: `${apiUrl}/api/v1/auth/login`,
       status: res.status,
       body: text.substring(0, 500),
     });
   } catch (e: unknown) {
     (results.tests as Record<string, unknown>[]).push({
-      url: `${API_URL}/api/v1/auth/login`,
+      url: `${apiUrl}/api/v1/auth/login`,
       error: e instanceof Error ? e.message : String(e),
     });
   }
@@ -44,15 +43,15 @@ export async function POST(req: Request) {
 
 export async function GET() {
   const results: Record<string, unknown> = {
-    api_url: API_URL,
+    api_url: apiUrl,
     node_env: process.env.NODE_ENV,
     tests: [] as Record<string, unknown>[],
   };
 
   for (const url of [
-    API_URL,
-    `${API_URL}/health`,
-    `${API_URL}/api/v1/auth/login`,
+    apiUrl,
+    `${apiUrl}/health`,
+    `${apiUrl}/api/v1/auth/login`,
   ]) {
     try {
       const controller = new AbortController();

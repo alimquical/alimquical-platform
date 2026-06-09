@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+import apiUrl from "@/lib/api-url";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
-    const res = await fetch(`${API_URL}/api/v1/auth/login`, {
+    const res = await fetch(`${apiUrl}/api/v1/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
