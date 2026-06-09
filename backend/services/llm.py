@@ -32,7 +32,7 @@ class LLMService:
         elif provider == "google":
             return self._chat_google(system_prompt, user_message, model or "gemini-1.5-flash", temperature)
         elif provider == "groq":
-            return self._chat_groq(system_prompt, user_message, model or "llama-3.3-70b-versatile", temperature)
+            return self._chat_groq(system_prompt, user_message, model or "llama3-70b-8192", temperature)
         return None
 
     def _chat_groq(self, system_prompt: str, user_message: str, model: str, temperature: float) -> Optional[str]:
@@ -45,7 +45,9 @@ class LLMService:
                 temperature=temperature,
             )
             return resp.choices[0].message.content
-        except Exception:
+        except Exception as e:
+            import logging
+            logging.error(f"Groq LLM error: {e}")
             return None
 
     def _chat_openai(self, system_prompt: str, user_message: str, model: str, temperature: float) -> Optional[str]:
