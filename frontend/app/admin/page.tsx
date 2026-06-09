@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sidebar } from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
-import { Users, Shield, Activity, BarChart3, Trash2, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { Users, Shield, Activity, BarChart3, Trash2, CheckCircle, XCircle, RefreshCw, Plus, X } from "lucide-react";
 
 interface UserData {
   id: string;
@@ -23,6 +23,9 @@ export default function AdminPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", password: "", company_name: "", plan: "starter", role: "user" });
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     const t = localStorage.getItem("access_token") || "";
@@ -114,7 +117,12 @@ export default function AdminPage() {
         </div>
 
         <Card>
-          <CardHeader><CardTitle className="text-lg">Usuarios registrados</CardTitle></CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg">Usuarios registrados</CardTitle>
+            <Button size="sm" onClick={() => setShowModal(true)}>
+              <Plus className="mr-2 h-4 w-4" />Crear usuario
+            </Button>
+          </CardHeader>
           <CardContent>
             {loading ? (
               <p className="text-sm text-muted-foreground">Cargando...</p>
@@ -179,6 +187,77 @@ export default function AdminPage() {
           </CardContent>
         </Card>
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowModal(false)}>
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold">Crear usuario</h2>
+              <button onClick={() => setShowModal(false)}><X className="h-5 w-5" /></button>
+            </div>
+            <form onSubmit={async (e) => {
+              e.preventDefault(); setCreating(true);
+              try {
+                const res = await fetch("/api/admin/users", {
+                  method: "POST",
+                  headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                  body: JSON.stringify(form),
+                });
+                if (res.ok) { setShowModal(false); setForm({ name: "", email: "", password: "", company_name: "", plan: "starter", role: "user" }); fetchUsers(token); }
+                else { const d = await res.json(); alert(d.detail || "Error"); }
+              } catch { alert("Error de conexión"); }
+              finally { setCreating(false); }
+            }} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Nombre</label>
+                  <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required
+                    className="w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Email</label>
+                  <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required
+                    className="w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Contraseña</label>
+                <input type="text" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required
+                  className="w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Empresa</label>
+                <input type="text" value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} required
+                  className="w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Rol</label>
+                  <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    className="w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                    <option value="user">Usuario</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Plan</label>
+                  <select value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value })}
+                    className="w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+                    <option value="starter">Starter</option>
+                    <option value="corporate">Corporate</option>
+                    <option value="enterprise">Enterprise</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" disabled={creating}
+                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
+                {creating ? "Creando..." : "Crear usuario"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </Sidebar>
   );
 }

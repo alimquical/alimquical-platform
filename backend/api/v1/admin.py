@@ -8,6 +8,7 @@ from models.subscription import Subscription
 from pydantic import BaseModel
 from typing import Optional
 from fastapi import Header
+from core.security import get_password_hash
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -24,6 +25,17 @@ def get_current_admin(authorization: str = Header(...), db: Session = Depends(ge
     return user
 
 
+class UserCreate(BaseModel):
+    name: str
+    email: str
+    password: str
+    company_name: str
+    plan: str = "starter"
+    role: str = "user"
+    meetings_limit: int = 50
+    users_limit: int = 5
+
+
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     role: Optional[str] = None
@@ -34,6 +46,20 @@ class PlanUpdate(BaseModel):
     plan: str
     meetings_limit: int = 50
     users_limit: int = 5
+
+
+@router.post("/users", status_code=201)
+def create_user(data: UserCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    existing = db.query(User).filter(User.email == data.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="El correo ya está registrado")
+    company = Company(name=data.company_name, plan=data.plan, meetings_limit=data.meetings_limit, users_limit=data.users_limit)
+    db.add(company); db.flush()
+    sub = Subscription(company_id=company.id, plan=data.plan, status="active")
+    db.add(sub)
+    user = User(email=data.email, name=data.name, hashed_password=get_password_hash(data.password), role=UserRole(data.role), company_id=company.id)
+    db.add(user); db.commit(); db.refresh(user)
+    return {"id": user.id, "email": user.email, "name": user.name, "role": user.role.value, "company_id": user.company_id}
 
 
 @router.get("/users")
