@@ -2,6 +2,46 @@ import { NextResponse } from "next/server";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "not set";
 
+export async function POST(req: Request) {
+  const results: Record<string, unknown> = {
+    api_url: API_URL,
+    tests: [] as Record<string, unknown>[],
+  };
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    body = null;
+  }
+
+  // Test login endpoint
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(`${API_URL}/api/v1/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body || { email: "admin@alimquical.com", password: "Admin123!" }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    const text = await res.text();
+    (results.tests as Record<string, unknown>[]).push({
+      url: `${API_URL}/api/v1/auth/login`,
+      status: res.status,
+      body: text.substring(0, 500),
+    });
+  } catch (e: unknown) {
+    (results.tests as Record<string, unknown>[]).push({
+      url: `${API_URL}/api/v1/auth/login`,
+      error: e instanceof Error ? e.message : String(e),
+    });
+  }
+
+  return NextResponse.json(results);
+}
+
 export async function GET() {
   const results: Record<string, unknown> = {
     api_url: API_URL,
@@ -9,23 +49,27 @@ export async function GET() {
     tests: [] as Record<string, unknown>[],
   };
 
-  // Test 1: just DNS resolution attempt via health endpoint
   for (const url of [
     API_URL,
     `${API_URL}/health`,
-    "https://alimquical-platform-production.up.railway.app/health",
-    "http://alimquical-platform-production.up.railway.app/health",
+    `${API_URL}/api/v1/auth/login`,
   ]) {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
-      const res = await fetch(url, { signal: controller.signal });
+      const opts: RequestInit = { signal: controller.signal };
+      if (url.includes("/login")) {
+        opts.method = "POST";
+        opts.headers = { "Content-Type": "application/json" };
+        opts.body = JSON.stringify({ email: "admin@alimquical.com", password: "Admin123!" });
+      }
+      const res = await fetch(url, opts);
       clearTimeout(timeout);
       const text = await res.text();
       (results.tests as Record<string, unknown>[]).push({
         url,
         status: res.status,
-        body: text.substring(0, 200),
+        body: text.substring(0, 500),
       });
     } catch (e: unknown) {
       (results.tests as Record<string, unknown>[]).push({
