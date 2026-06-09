@@ -6,17 +6,15 @@ export async function GET(req: NextRequest) {
   const auth = req.headers.get("Authorization") || "";
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), 8000);
     const res = await fetch(`${API_URL}/api/v1/admin/users`, {
-      headers: { Authorization: auth, "Bypass-Tunnel-Reminder": "true" },
+      headers: { Authorization: auth },
       signal: controller.signal,
     });
     clearTimeout(timeout);
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch {
-    return NextResponse.json([
-      { id: 1, email: "admin@alimquical.com", name: "Super Admin", role: "admin", is_active: true },
-    ]);
+    return NextResponse.json({ detail: "Error de conexión con el servidor" }, { status: 503 });
   }
 }
