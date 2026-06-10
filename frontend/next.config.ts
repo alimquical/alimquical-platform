@@ -1,8 +1,18 @@
 import type { NextConfig } from "next";
 
+const API_URL = process.env.API_URL || "https://alimquical-platform-production.up.railway.app";
+
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   reactStrictMode: true,
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${API_URL}/api/v1/:path*`,
+      },
+    ];
+  },
   headers: async () => [
     {
       source: "/(.*)",

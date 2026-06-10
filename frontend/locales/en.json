@@ -47,7 +47,15 @@
     "history": "History",
     "new_meeting": "New meeting",
     "participants": "participants",
-    "tasks": "tasks"
+    "tasks": "tasks",
+    "upcoming_events": "Upcoming Events",
+    "active_tasks": "Active Tasks",
+    "no_meetings": "No recent meetings",
+    "no_events": "No scheduled events",
+    "no_tasks": "No pending tasks",
+    "due": "Due",
+    "no_due": "No due date",
+    "error_loading": "Error loading dashboard"
   },
   "admin": {
     "title": "Administration",

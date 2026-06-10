@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,31 +19,73 @@ import {
   Plus,
 } from "lucide-react";
 
-const stats = [
-  { key: "stats_meetings", value: "24", change: "+12%", icon: Calendar, color: "text-blue-600 bg-blue-100" },
-  { key: "stats_clients", value: "156", change: "+8%", icon: Users, color: "text-green-600 bg-green-100" },
-  { key: "stats_documents", value: "342", change: "+23%", icon: FileText, color: "text-purple-600 bg-purple-100" },
-  { key: "stats_tasks", value: "89", change: "+18%", icon: CheckCircle2, color: "text-orange-600 bg-orange-100" },
-];
+interface Overview {
+  meetings: { total: number; pending: number; recent_today: number };
+  tasks: { total: number; active: number; overdue: number };
+  clients: { total: number; active: number };
+  documents: { total: number };
+  company: { name: string; plan: string };
+}
 
-const recentMeetings = [
-  { id: 1, title: "Revisión trimestral Q2", date: { key: "today", time: "10:00" }, participants: 8, status: "completed" },
-  { id: 2, title: "Sprint planning - Equipo Dev", date: { key: "today", time: "14:00" }, participants: 6, status: "scheduled" },
-  { id: 3, title: "Presentación cliente nuevo", date: { key: "tomorrow", time: "09:00" }, participants: 4, status: "scheduled" },
-  { id: 4, title: "Comité de calidad ISO 9001", date: { key: "yesterday", time: "11:00" }, participants: 12, status: "completed" },
-];
+interface Activity {
+  id: string; type: string; title: string; date: string;
+  status: string; participants: string;
+}
 
-const agents = [
-  { name: "CEA - Director Ejecutivo", status: "active", tasks: 145, icon: Bot },
-  { name: "Secretario de Reuniones", status: "active", tasks: 89, icon: Clock },
-  { name: "Analista de Negocios", status: "active", tasks: 67, icon: TrendingUp },
-  { name: "Agente CRM", status: "active", tasks: 234, icon: Users },
-  { name: "Agente Legal", status: "inactive", tasks: 12, icon: AlertCircle },
-  { name: "Agente Financiero", status: "active", tasks: 56, icon: TrendingUp },
-];
+interface TaskItem {
+  id: string; title: string; status: string;
+  priority: string; due_date: string | null;
+}
+
+interface CalendarEvent {
+  id: string; title: string; date: string;
+  duration: number; participants: string;
+}
+
+interface Alert {
+  type: string; message: string;
+}
 
 export default function DashboardPage() {
   const { t } = useTranslation();
+  const [overview, setOverview] = useState<Overview | null>(null);
+  const [activity, setActivity] = useState<Activity[]>([]);
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    const fetchData = async () => {
+      try {
+        const [overviewRes, activityRes, tasksRes, calRes, notifRes] = await Promise.all([
+          fetch("/api/dashboard/overview", { headers: { Authorization: `Bearer ${token}` } }),
+          fetch("/api/dashboard/activity", { headers: { Authorization: `Bearer ${token}` } }),
+          fetch("/api/dashboard/tasks", { headers: { Authorization: `Bearer ${token}` } }),
+          fetch("/api/dashboard/calendar", { headers: { Authorization: `Bearer ${token}` } }),
+          fetch("/api/dashboard/notifications", { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+        if (overviewRes.ok) setOverview(await overviewRes.json());
+        if (activityRes.ok) setActivity(await activityRes.json());
+        if (tasksRes.ok) setTasks(await tasksRes.json());
+        if (calRes.ok) setEvents(await calRes.json());
+        if (notifRes.ok) setAlerts(await notifRes.json());
+      } catch {
+        setError(t("dashboard.error_loading"));
+      }
+    };
+    fetchData();
+  }, [t]);
+
+  const stats = overview ? [
+    { key: "stats_meetings", value: String(overview.meetings.total), change: `${overview.meetings.pending} pendientes`, icon: Calendar, color: "text-blue-600 bg-blue-100" },
+    { key: "stats_clients", value: String(overview.clients.active), change: `${overview.clients.total} totales`, icon: Users, color: "text-green-600 bg-green-100" },
+    { key: "stats_documents", value: String(overview.documents.total), change: "", icon: FileText, color: "text-purple-600 bg-purple-100" },
+    { key: "stats_tasks", value: String(overview.tasks.active), change: `${overview.tasks.overdue} vencidas`, icon: CheckCircle2, color: "text-orange-600 bg-orange-100" },
+  ] : [];
 
   return (
     <Sidebar>
@@ -50,19 +93,36 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">{t("dashboard.title")}</h1>
-            <p className="text-sm text-muted-foreground">{t("dashboard.welcome")}</p>
+            <p className="text-sm text-muted-foreground">
+              {overview ? `${overview.company.name} • ${overview.company.plan}` : t("dashboard.welcome")}
+            </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => window.location.href = "/agenda"}>
               <Clock className="mr-2 h-4 w-4" />
               {t("dashboard.history")}
             </Button>
-            <Button size="sm">
+            <Button size="sm" onClick={() => window.location.href = "/reuniones"}>
               <Plus className="mr-2 h-4 w-4" />
               {t("dashboard.new_meeting")}
             </Button>
           </div>
         </div>
+
+        {alerts.map((alert, i) => (
+          <div key={i} className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm ${
+            alert.type === "warning" ? "bg-yellow-50 border-yellow-200 text-yellow-800" : "bg-blue-50 border-blue-200 text-blue-800"
+          }`}>
+            <AlertCircle className="h-4 w-4" />
+            {alert.message}
+          </div>
+        ))}
+
+        {error && (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
@@ -72,10 +132,12 @@ export default function DashboardPage() {
                   <div className={stat.color + " rounded-lg p-2"}>
                     <stat.icon className="h-5 w-5" />
                   </div>
-                  <span className="flex items-center text-xs text-green-600 font-medium">
-                    {stat.change}
-                    <ArrowUpRight className="ml-1 h-3 w-3" />
-                  </span>
+                  {stat.change && (
+                    <span className="flex items-center text-xs text-green-600 font-medium">
+                      {stat.change}
+                      <ArrowUpRight className="ml-1 h-3 w-3" />
+                    </span>
+                  )}
                 </div>
                 <div className="mt-4">
                   <p className="text-2xl font-bold">{stat.value}</p>
@@ -92,53 +154,96 @@ export default function DashboardPage() {
               <CardTitle className="text-lg">{t("dashboard.recent_meetings")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentMeetings.map((meeting) => (
-                  <div key={meeting.id} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{meeting.title}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-muted-foreground">{t("common." + meeting.date.key)}, {meeting.date.time}</span>
-                        <span className="text-xs text-muted-foreground">•</span>
-                        <span className="text-xs text-muted-foreground">{meeting.participants} {t("dashboard.participants")}</span>
+              {activity.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t("dashboard.no_meetings")}</p>
+              ) : (
+                <div className="space-y-4">
+                  {activity.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{item.title}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-muted-foreground">{new Date(item.date).toLocaleDateString()}</span>
+                          <span className="text-xs text-muted-foreground">•</span>
+                          <span className="text-xs text-muted-foreground">{item.participants || "0"} {t("dashboard.participants")}</span>
+                        </div>
                       </div>
+                      <Badge variant={item.status === "completed" ? "success" : "secondary"}>
+                        {item.status === "completed" ? t("meetings.completed") : t("meetings.scheduled")}
+                      </Badge>
                     </div>
-                    <Badge variant={meeting.status === "completed" ? "success" : "secondary"}>
-                      {meeting.status === "completed" ? t("meetings.completed") : t("meetings.scheduled")}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">{t("dashboard.agents_status")}</CardTitle>
+              <CardTitle className="text-lg">{t("dashboard.upcoming_events")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {agents.map((agent) => (
-                  <div key={agent.name} className="flex items-center justify-between rounded-lg border p-3">
-                    <div className="flex items-center gap-3">
-                      <div className="rounded-lg bg-blue-100 p-2">
-                        <agent.icon className="h-4 w-4 text-blue-600" />
+              {events.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t("dashboard.no_events")}</p>
+              ) : (
+                <div className="space-y-4">
+                  {events.map((ev) => (
+                    <div key={ev.id} className="flex items-center justify-between rounded-lg border p-3">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-lg bg-blue-100 p-2">
+                          <Calendar className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{ev.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(ev.date).toLocaleDateString()} • {ev.duration}min
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium">{agent.name}</p>
-                        <p className="text-xs text-muted-foreground">{agent.tasks} {t("dashboard.tasks")}</p>
-                      </div>
+                      <Badge variant="outline">{ev.participants || "0"} {t("dashboard.participants")}</Badge>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${agent.status === "active" ? "bg-green-500" : "bg-gray-300"}`} />
-                      <span className="text-xs capitalize">{agent.status === "active" ? t("clients.active") : t("clients.inactive")}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{t("dashboard.active_tasks")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {tasks.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t("dashboard.no_tasks")}</p>
+            ) : (
+              <div className="space-y-3">
+                {tasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`rounded-lg p-2 ${
+                        task.priority === "high" ? "bg-red-100" : task.priority === "medium" ? "bg-yellow-100" : "bg-gray-100"
+                      }`}>
+                        <CheckCircle2 className={`h-4 w-4 ${
+                          task.priority === "high" ? "text-red-600" : task.priority === "medium" ? "text-yellow-600" : "text-gray-600"
+                        }`} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{task.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {task.due_date ? `${t("dashboard.due")}: ${new Date(task.due_date).toLocaleDateString()}` : t("dashboard.no_due")}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant={task.status === "done" ? "success" : task.status === "in_progress" ? "secondary" : "outline"}>
+                      {task.status === "done" ? t("tasks.done") : task.status === "in_progress" ? t("tasks.in_progress") : t("tasks.todo")}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </Sidebar>
   );

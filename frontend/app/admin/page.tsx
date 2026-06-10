@@ -77,7 +77,7 @@ export default function AdminPage() {
   const toggleUser = async (userId: string, current: boolean) => {
     const token = localStorage.getItem("access_token");
     await fetch(`/api/admin/users/${userId}`, {
-      method: "PATCH",
+      method: "PUT",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ is_active: !current }),
     });

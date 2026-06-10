@@ -47,7 +47,15 @@
     "history": "Historial",
     "new_meeting": "Nueva reunión",
     "participants": "participantes",
-    "tasks": "tareas"
+    "tasks": "tareas",
+    "upcoming_events": "Próximos Eventos",
+    "active_tasks": "Tareas Activas",
+    "no_meetings": "No hay reuniones recientes",
+    "no_events": "No hay eventos programados",
+    "no_tasks": "No hay tareas pendientes",
+    "due": "Vence",
+    "no_due": "Sin fecha",
+    "error_loading": "Error al cargar el dashboard"
   },
   "admin": {
     "title": "Administración",

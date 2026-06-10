@@ -13,6 +13,7 @@ from api.v1.meetings import router as meetings_router
 from api.v1.admin import router as admin_router
 from api.v1.payments import router as payments_router
 from api.v1.agents import router as agents_router
+from api.v1.dashboard import router as dashboard_router
 
 if settings.SENTRY_DSN:
     try:
@@ -68,6 +69,7 @@ app.include_router(meetings_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(payments_router, prefix="/api/v1")
 app.include_router(agents_router, prefix="/api/v1")
+app.include_router(dashboard_router, prefix="/api/v1")
 
 
 @app.get("/health")
