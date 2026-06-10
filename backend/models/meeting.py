@@ -23,6 +23,8 @@ class Meeting(Base):
     transcript = Column(Text, nullable=True)
     summary = Column(Text, nullable=True)
     participants = Column(Text, nullable=True)
+    recording_url = Column(String, nullable=True)
+    recording_duration = Column(Integer, nullable=True)
     company_id = Column(String, ForeignKey("companies.id"), nullable=False)
     created_by = Column(String, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

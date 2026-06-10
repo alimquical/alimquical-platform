@@ -96,7 +96,18 @@
     "participants": "participants",
     "completed": "completed",
     "scheduled": "scheduled",
-    "cancelled": "cancelled"
+    "cancelled": "cancelled",
+    "loading": "Loading...",
+    "no_meetings": "No meetings yet. Create one to get started.",
+    "recording_in_progress": "Recording meeting...",
+    "stop": "Stop",
+    "mic_error": "Could not access microphone. Check permissions.",
+    "delete_confirm": "Delete this meeting?",
+    "title_label": "Title",
+    "date_label": "Date and time",
+    "duration_label": "Duration (minutes)",
+    "participants_label": "Participants",
+    "create": "Create meeting"
   },
   "clients": {
     "title": "Clients",

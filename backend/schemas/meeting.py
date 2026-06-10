@@ -10,6 +10,16 @@ class MeetingCreate(BaseModel):
     participants: Optional[str] = None
 
 
+class MeetingUpdate(BaseModel):
+    title: Optional[str] = None
+    date: Optional[datetime] = None
+    duration: Optional[int] = None
+    status: Optional[str] = None
+    participants: Optional[str] = None
+    summary: Optional[str] = None
+    transcript: Optional[str] = None
+
+
 class MeetingResponse(BaseModel):
     id: str
     title: str
@@ -19,7 +29,11 @@ class MeetingResponse(BaseModel):
     transcript: Optional[str] = None
     summary: Optional[str] = None
     participants: Optional[str] = None
+    recording_url: Optional[str] = None
+    recording_duration: Optional[int] = None
     company_id: str
+    created_by: Optional[str] = None
     created_at: datetime
+    updated_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}

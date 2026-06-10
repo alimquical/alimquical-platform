@@ -96,7 +96,18 @@
     "participants": "participantes",
     "completed": "completada",
     "scheduled": "programada",
-    "cancelled": "cancelada"
+    "cancelled": "cancelada",
+    "loading": "Cargando...",
+    "no_meetings": "No hay reuniones aún. Crea una nueva para comenzar.",
+    "recording_in_progress": "Grabando reunión...",
+    "stop": "Detener",
+    "mic_error": "No se pudo acceder al micrófono. Verifica los permisos.",
+    "delete_confirm": "¿Eliminar esta reunión?",
+    "title_label": "Título",
+    "date_label": "Fecha y hora",
+    "duration_label": "Duración (minutos)",
+    "participants_label": "Participantes",
+    "create": "Crear reunión"
   },
   "clients": {
     "title": "Clientes",
